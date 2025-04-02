@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Canvas Tab Progress</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+    }
+    .progress-container {
+      background-color: #ddd;
+      height: 25px;
+      width: 100%;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #4caf50;
+      transition: width 0.3s ease;
+    }
+    #progress-label {
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="progress-label">Progress: 0%</div>
+  <div class="progress-container">
+    <div id="progress-bar" class="progress-bar"></div>
+  </div>
+
+  <script>
+    let totalTabs = 0;
+    const clickedTabs = new Set();
+    const progressBar = document.getElementById('progress-bar');
+    const label = document.getElementById('progress-label');
+
+    function updateProgress() {
+      const percent = Math.round((clickedTabs.size / totalTabs) * 100);
+      progressBar.style.width = percent + '%';
+      label.textContent = `Progress: ${percent}%`;
+    }
+
+    function initProgressFromParent() {
+      try {
+        const parentDoc = window.parent.document;
+
+        // Get all tabs on the Canvas page
+        const tabElements = parentDoc.querySelectorAll('.dp-panel-heading');
+        totalTabs = tabElements.length;
+
+        tabElements.forEach((tab, index) => {
+          tab.addEventListener('click', () => {
+            clickedTabs.add(index);
+            updateProgress();
+          });
+        });
+
+        updateProgress();
+      } catch (err) {
+        label.textContent = 'Unable to access parent page.';
+        console.error('Progress iframe error:', err);
+      }
+    }
+
+    // Wait a moment for the parent to load
+    window.addEventListener('load', () => {
+      setTimeout(initProgressFromParent, 500);
+    });
+  </script>
+</body>
+</html>
