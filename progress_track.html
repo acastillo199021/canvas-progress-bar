@@ -7,6 +7,7 @@
     body {
       font-family: Arial, sans-serif;
       padding: 10px;
+      margin: 0;
     }
     .progress-container {
       background-color: #ddd;
@@ -29,49 +30,25 @@
   </style>
 </head>
 <body>
+
   <div id="progress-label">Progress: 0%</div>
   <div class="progress-container">
     <div id="progress-bar" class="progress-bar"></div>
   </div>
 
   <script>
-    let totalTabs = 0;
-    const clickedTabs = new Set();
     const progressBar = document.getElementById('progress-bar');
     const label = document.getElementById('progress-label');
 
-    function updateProgress() {
-      const percent = Math.round((clickedTabs.size / totalTabs) * 100);
-      progressBar.style.width = percent + '%';
-      label.textContent = `Progress: ${percent}%`;
-    }
-
-    function initProgressFromParent() {
-      try {
-        const parentDoc = window.parent.document;
-
-        // Get all tabs on the Canvas page
-        const tabElements = parentDoc.querySelectorAll('.dp-panel-heading');
-        totalTabs = tabElements.length;
-
-        tabElements.forEach((tab, index) => {
-          tab.addEventListener('click', () => {
-            clickedTabs.add(index);
-            updateProgress();
-          });
-        });
-
-        updateProgress();
-      } catch (err) {
-        label.textContent = 'Unable to access parent page.';
-        console.error('Progress iframe error:', err);
+    // Listen for postMessage from parent Canvas page
+    window.addEventListener("message", (event) => {
+      if (event.data && typeof event.data.progress === "number") {
+        const percent = event.data.progress;
+        progressBar.style.width = percent + "%";
+        label.textContent = `Progress: ${percent}%`;
       }
-    }
-
-    // Wait a moment for the parent to load
-    window.addEventListener('load', () => {
-      setTimeout(initProgressFromParent, 500);
     });
   </script>
+
 </body>
 </html>
