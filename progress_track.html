@@ -27,27 +27,83 @@
       margin-bottom: 8px;
       font-weight: bold;
     }
+    .checkpoints {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.checkpoint {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border: 2px solid #4caf50;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: background-color 0.3s;
+}
+
+.checkpoint.completed {
+  background-color: #4caf50;
+}
   </style>
 </head>
 <body>
 
-  <div id="progress-label">Progress: 0%</div>
-  <div class="progress-container">
-    <div id="progress-bar" class="progress-bar"></div>
-  </div>
+ <div id="progress-label">Progress: 0%</div>
+<div class="progress-container">
+  <div id="progress-bar" class="progress-bar"></div>
+  <div id="checkpoints" class="checkpoints"></div>
+</div>
 
-  <script>
-    const progressBar = document.getElementById('progress-bar');
-    const label = document.getElementById('progress-label');
+<script>
+  const progressBar = document.getElementById('progress-bar');
+  const label = document.getElementById('progress-label');
+  const checkpointContainer = document.getElementById('checkpoints');
+  let totalTabs = 0;
 
-    window.addEventListener("message", (event) => {
-      if (event.data && typeof event.data.progress === "number") {
-        const percent = event.data.progress;
-        progressBar.style.width = percent + "%";
-        label.textContent = `Progress: ${percent}%`;
+  function renderCheckpoints(n) {
+    checkpointContainer.innerHTML = ''; // Clear old ones
+    for (let i = 0; i < n; i++) {
+      const checkpoint = document.createElement('div');
+      checkpoint.className = 'checkpoint';
+      const percent = (i / (n - 1)) * 100;
+      checkpoint.style.left = percent + '%';
+      checkpointContainer.appendChild(checkpoint);
+    }
+  }
+
+  window.addEventListener("message", (event) => {
+    if (event.data && typeof event.data.progress === "number") {
+      const percent = event.data.progress;
+      const clickedCount = event.data.clickedCount;
+      const total = event.data.totalTabs;
+
+      if (total !== totalTabs) {
+        totalTabs = total;
+        renderCheckpoints(total);
       }
-    });
-  </script>
+
+      progressBar.style.width = percent + "%";
+      label.textContent = `Progress: ${percent}%`;
+
+      // Mark checkpoints as completed
+      const checkpoints = checkpointContainer.querySelectorAll('.checkpoint');
+      checkpoints.forEach((cp, i) => {
+        if (i < clickedCount) {
+          cp.classList.add('completed');
+        } else {
+          cp.classList.remove('completed');
+        }
+      });
+    }
+  });
+</script>
 
 </body>
 </html>
