@@ -40,7 +40,6 @@
     const progressBar = document.getElementById('progress-bar');
     const label = document.getElementById('progress-label');
 
-    // Only listen for progress updates via postMessage
     window.addEventListener("message", (event) => {
       if (event.data && typeof event.data.progress === "number") {
         const percent = event.data.progress;
