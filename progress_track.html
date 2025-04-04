@@ -1,112 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Canvas Progress Bar</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
-      margin: 0;
-    }
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px 10px 10px 10px;
+    overflow: hidden; /* ✅ Prevent scrollbars */
+  }
 
-    #progress-label {
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
+  .progress-container {
+    background-color: #922E1F;
+    height: 20px;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
 
-    .progress-bar-wrapper {
-      position: relative;
-      margin-bottom: 15px;
-    }
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: black; /* ✅ The inner bar (dots are black too) */
+    transition: width 0.3s ease;
+  }
 
-    .progress-container {
-      background-color: #ddd;
-      height: 20px;
-      border-radius: 10px;
-      overflow: hidden;
-    }
+  #progress-label {
+    margin-top: 10px; /* ✅ Move label BELOW the bar */
+    text-align: left;
+    font-weight: bold;
+  }
 
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background-color: #922E1F;
-      transition: width 0.3s ease;
-    }
+  .progress-dots {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding: 0 5px;
+  }
 
-    .checkpoints {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding: 0 5px;
-    }
+  .progress-dot {
+    width: 12px;
+    height: 12px;
+    border: 2px solid black;
+    border-radius: 50%;
+    background-color: white;
+    position: relative;
+  }
 
-    .checkpoint {
-      flex: 0 0 auto;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      border: 2px solid black;
-      background-color: white;
-      transition: background-color 0.3s ease;
-    }
+  .progress-dot.filled {
+    background-color: black;
+  }
 
-    .checkpoint.filled {
-      background-color: #922E1F;
-    }
-
-    .scroll-container {
-      overflow-x: hidden;
-    }
-  </style>
-</head>
-<body>
-
-  <div id="progress-label">Progress: 0%</div>
-  <div class="scroll-container">
-    <div class="checkpoints" id="checkpoints"></div>
-    <div class="progress-bar-wrapper">
-      <div class="progress-container">
-        <div id="progress-bar" class="progress-bar"></div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const progressBar = document.getElementById('progress-bar');
-    const label = document.getElementById('progress-label');
-    const checkpointContainer = document.getElementById('checkpoints');
-
-    let totalTabs = 0;
-
-    function renderCheckpoints(total, clickedCount = 0) {
-      checkpointContainer.innerHTML = '';
-      for (let i = 0; i < total; i++) {
-        const dot = document.createElement('div');
-        dot.classList.add('checkpoint');
-        if (i < clickedCount) {
-          dot.classList.add('filled');
-        }
-        checkpointContainer.appendChild(dot);
-      }
-    }
-
-    window.addEventListener("message", (event) => {
-      const { progress, clickedCount, totalTabs: totalFromParent } = event.data || {};
-
-      if (typeof progress === "number") {
-        progressBar.style.width = progress + "%";
-        label.textContent = `Progress: ${progress}%`;
-      }
-
-      if (typeof totalFromParent === "number") {
-        totalTabs = totalFromParent;
-        renderCheckpoints(totalTabs, clickedCount || 0);
-      }
-    });
-  </script>
-
-</body>
-</html>
+  .progress-dot:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #922E1F;
+    color: white;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 999;
+  }
+</style>
