@@ -5,72 +5,71 @@
   <title>Canvas Tab Progress</title>
   <style>
     body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 20px 10px 30px 10px; /* ⬅️ Added more bottom padding */
-  overflow: hidden;
-}
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px 10px 40px 10px; /* Extra bottom padding */
+      overflow: hidden;
+    }
 
-.progress-dots {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 18px; /* More spacing between dots and bar */
-  padding: 0 5px;
-}
+    .progress-dots {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding: 0 5px;
+    }
 
-.progress-dot {
-  width: 16px;
-  height: 16px;
-  border: 2px solid black;
-  border-radius: 50%;
-  background-color: white;
-  position: relative;
-}
+    .progress-dot {
+      width: 16px;
+      height: 16px;
+      border: 2px solid black;
+      border-radius: 50%;
+      background-color: white;
+      position: relative;
+    }
 
-.progress-dot.filled {
-  background-color: #922E1F;
-}
+    .progress-dot.filled {
+      background-color: #922E1F;
+    }
 
-.progress-dot:hover::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 140%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: black;
-  color: white;
-  padding: 4px 8px;
-  font-size: 12px;
-  border-radius: 4px;
-  white-space: nowrap;
-  z-index: 999;
-}
+    .progress-dot:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 140%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: black;
+      color: white;
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 999;
+    }
 
-.progress-container {
-  background-color: white;
-  border: 2px solid black;
-  height: 22px;
-  width: 100%;
-  border-radius: 12px;
-  overflow: visible; /* ✅ Ensure rounded bar ends aren't clipped */
-  margin-bottom: 20px;
-}
+    .progress-container {
+      background-color: white;
+      border: 2px solid black;
+      height: 22px;
+      width: 100%;
+      border-radius: 12px;
+      overflow: visible;
+      margin-bottom: 16px;
+    }
 
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  background-color: #922E1F;
-  transition: width 0.3s ease;
-  border-top-left-radius: 12px;
-  border-bottom-left-radius: 12px;
-}
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #922E1F;
+      transition: width 0.3s ease;
+      border-top-left-radius: 12px;
+      border-bottom-left-radius: 12px;
+    }
 
-#progress-label {
-  margin-top: 16px;
-  text-align: left;
-  font-weight: bold;
-}
-
+    #progress-label {
+      margin-top: 8px;
+      text-align: center;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
