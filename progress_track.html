@@ -1,65 +1,115 @@
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px 10px 10px 10px;
-    overflow: hidden; /* ✅ Prevent scrollbars */
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Canvas Tab Progress</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px 10px 10px 10px;
+      overflow: hidden; /* ✅ Hide scrollbar */
+    }
 
-  .progress-container {
-    background-color: #922E1F;
-    height: 20px;
-    width: 100%;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 10px;
-  }
+    .progress-dots {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 0 5px;
+    }
 
-  .progress-bar {
-    height: 100%;
-    width: 0%;
-    background-color: black; /* ✅ The inner bar (dots are black too) */
-    transition: width 0.3s ease;
-  }
+    .progress-dot {
+      width: 12px;
+      height: 12px;
+      border: 2px solid black;
+      border-radius: 50%;
+      background-color: white;
+      position: relative;
+    }
 
-  #progress-label {
-    margin-top: 10px; /* ✅ Move label BELOW the bar */
-    text-align: left;
-    font-weight: bold;
-  }
+    .progress-dot.filled {
+      background-color: black;
+    }
 
-  .progress-dots {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-    padding: 0 5px;
-  }
+    .progress-dot:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 140%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #922E1F;
+      color: white;
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 999;
+    }
 
-  .progress-dot {
-    width: 12px;
-    height: 12px;
-    border: 2px solid black;
-    border-radius: 50%;
-    background-color: white;
-    position: relative;
-  }
+    .progress-container {
+      background-color: #922E1F; /* ✅ Red base */
+      height: 20px;
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
 
-  .progress-dot.filled {
-    background-color: black;
-  }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: black; /* ✅ Black bar */
+      transition: width 0.3s ease;
+    }
 
-  .progress-dot:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 120%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #922E1F;
-    color: white;
-    padding: 4px 8px;
-    font-size: 12px;
-    border-radius: 4px;
-    white-space: nowrap;
-    z-index: 999;
-  }
-</style>
+    #progress-label {
+      margin-top: 10px; /* ✅ Move label below */
+      text-align: left;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="progress-dots" id="progress-dots"></div>
+  <div class="progress-container">
+    <div id="progress-bar" class="progress-bar"></div>
+  </div>
+  <div id="progress-label">Progress: 0%</div>
+
+  <script>
+    const progressBar = document.getElementById('progress-bar');
+    const label = document.getElementById('progress-label');
+    const dotsContainer = document.getElementById('progress-dots');
+
+    function renderDots(total, clicked) {
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < total; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
+        if (i < clicked) dot.classList.add('filled');
+        dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    window.addEventListener("message", (event) => {
+      if (
+        event.data &&
+        typeof event.data.progress === "number" &&
+        typeof event.data.clickedCount === "number" &&
+        typeof event.data.totalTabs === "number"
+      ) {
+        const percent = event.data.progress;
+        const clicked = event.data.clickedCount;
+        const total = event.data.totalTabs;
+
+        progressBar.style.width = percent + "%";
+        label.textContent = `Progress: ${percent}%`;
+        renderDots(total, clicked);
+      }
+    });
+  </script>
+
+</body>
+</html>
