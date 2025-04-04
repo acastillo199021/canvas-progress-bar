@@ -10,8 +10,28 @@
       margin: 0;
     }
 
-    .scroll-container {
-      overflow-x: hidden;
+    #progress-label {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-wrapper {
+      position: relative;
+      margin-bottom: 15px;
+    }
+
+    .progress-container {
+      background-color: #ddd;
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #922E1F;
+      transition: width 0.3s ease;
     }
 
     .checkpoints {
@@ -31,57 +51,20 @@
       border: 2px solid black;
       background-color: white;
       transition: background-color 0.3s ease;
-      position: relative;
     }
 
     .checkpoint.filled {
       background-color: #922E1F;
     }
 
-    /* Tooltip style */
-    .checkpoint:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      top: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: black;
-      color: white;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      white-space: nowrap;
-      z-index: 10;
-    }
-
-    .progress-bar-wrapper {
-      position: relative;
-      margin-bottom: 5px;
-    }
-
-    .progress-container {
-      background-color: #ddd;
-      height: 20px;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background-color: #922E1F;
-      transition: width 0.3s ease;
-    }
-
-    #progress-label {
-      font-weight: bold;
-      margin-top: 10px;
-      text-align: left;
+    .scroll-container {
+      overflow-x: hidden;
     }
   </style>
 </head>
 <body>
 
+  <div id="progress-label">Progress: 0%</div>
   <div class="scroll-container">
     <div class="checkpoints" id="checkpoints"></div>
     <div class="progress-bar-wrapper">
@@ -89,7 +72,6 @@
         <div id="progress-bar" class="progress-bar"></div>
       </div>
     </div>
-    <div id="progress-label">Progress: 0%</div>
   </div>
 
   <script>
@@ -104,7 +86,6 @@
       for (let i = 0; i < total; i++) {
         const dot = document.createElement('div');
         dot.classList.add('checkpoint');
-        dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
         if (i < clickedCount) {
           dot.classList.add('filled');
         }
