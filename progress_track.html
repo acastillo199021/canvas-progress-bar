@@ -7,7 +7,7 @@
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 20px 10px 40px 10px; /* Extra bottom padding */
+      padding: 20px 10px 30px 10px;
       overflow: hidden;
     }
 
@@ -31,6 +31,15 @@
       background-color: #922E1F;
     }
 
+    .progress-dot.skipped {
+      animation: blink-yellow 1s infinite;
+    }
+
+    @keyframes blink-yellow {
+      0%, 100% { background-color: yellow; }
+      50% { background-color: white; }
+    }
+
     .progress-dot:hover::after {
       content: attr(data-tooltip);
       position: absolute;
@@ -47,16 +56,14 @@
     }
 
     .progress-container {
-  background-color: white;
-  border: 2px solid black;
-  height: 22px;
-  width: 100%;
-  border-radius: 12px;
-  overflow: visible;
-  margin-bottom: 12px; /* was 16px before — slightly adjusted */
-  position: relative;
-  z-index: 1;
-}
+      background-color: white;
+      border: 2px solid black;
+      height: 22px;
+      width: 100%;
+      border-radius: 12px;
+      overflow: visible;
+      margin-bottom: 20px;
+    }
 
     .progress-bar {
       height: 100%;
@@ -68,12 +75,10 @@
     }
 
     #progress-label {
-  margin-top: 8px;
-  font-weight: bold;
-  text-align: center;
-  position: relative;
-  z-index: 2;
-}
+      margin-top: 16px;
+      text-align: left;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -89,13 +94,21 @@
     const label = document.getElementById('progress-label');
     const dotsContainer = document.getElementById('progress-dots');
 
-    function renderDots(total, clicked) {
+    function renderDots(total, clickedSet) {
       dotsContainer.innerHTML = '';
+      const maxClicked = clickedSet.size ? Math.max(...clickedSet) : -1;
+
       for (let i = 0; i < total; i++) {
         const dot = document.createElement('div');
         dot.className = 'progress-dot';
-        if (i < clicked) dot.classList.add('filled');
-        dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
+
+        if (clickedSet.has(i)) {
+          dot.classList.add('filled');
+        } else if (i < maxClicked) {
+          dot.classList.add('skipped');
+        }
+
+        dot.setAttribute('data-tooltip', `Lesson ${i + 1}${dot.classList.contains('skipped') ? ' (Skipped)' : ''}`);
         dotsContainer.appendChild(dot);
       }
     }
@@ -105,10 +118,11 @@
         event.data &&
         typeof event.data.progress === "number" &&
         typeof event.data.clickedCount === "number" &&
-        typeof event.data.totalTabs === "number"
+        typeof event.data.totalTabs === "number" &&
+        Array.isArray(event.data.clickedIndexes)
       ) {
         const percent = event.data.progress;
-        const clicked = event.data.clickedCount;
+        const clicked = new Set(event.data.clickedIndexes);
         const total = event.data.totalTabs;
 
         progressBar.style.width = percent + "%";
