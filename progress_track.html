@@ -19,29 +19,28 @@
     }
 
     .progress-dot {
-  width: 16px;
-  height: 16px;
-  border: 2px solid black;
-  border-radius: 50%;
-  background-color: white;
-  position: relative;
-}
+      width: 16px;
+      height: 16px;
+      border: 2px solid black;
+      border-radius: 50%;
+      background-color: white;
+      position: relative;
+    }
 
     .progress-dot.filled {
-  background-color: #922E1F;
-}
+      background-color: #922E1F;
+    }
 
     .progress-dot.skipped {
-  animation: blinkYellow 1s infinite;
-  background-color: yellow;
-  border-color: black;
-}
+      animation: blink 1s infinite;
+      background-color: yellow;
+      border-color: black;
+    }
 
-   @keyframes blinkYellow {
-  0% { background-color: yellow; }
-  50% { background-color: white; }
-  100% { background-color: yellow; }
-}
+    @keyframes blink {
+      0%, 100% { background-color: yellow; }
+      50% { background-color: white; }
+    }
 
     .progress-dot:hover::after {
       content: attr(data-tooltip);
@@ -65,7 +64,7 @@
       width: 100%;
       border-radius: 12px;
       overflow: visible;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
     .progress-bar {
@@ -92,68 +91,42 @@
   </div>
   <div id="progress-label">Progress: 0%</div>
 
- <script>
-  const progressBar = document.getElementById('progress-bar');
-  const label = document.getElementById('progress-label');
-  const dotsContainer = document.getElementById('progress-dots');
+  <script>
+    const progressBar = document.getElementById('progress-bar');
+    const label = document.getElementById('progress-label');
+    const dotsContainer = document.getElementById('progress-dots');
 
-  let previouslyClicked = [];
+    function renderDots(total, clicked, skipped = []) {
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < total; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
+        dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
 
-  function renderDots(total, clickedCount, skippedIndexes = []) {
-    dotsContainer.innerHTML = '';
-    for (let i = 0; i < total; i++) {
-      const dot = document.createElement('div');
-      dot.className = 'progress-dot';
-      dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
-
-      if (previouslyClicked.includes(i)) {
-        dot.classList.add('filled');
-      }
-
-      if (skippedIndexes.includes(i)) {
-        dot.classList.add('skipped');
-      }
-
-      dotsContainer.appendChild(dot);
-    }
-  }
-
-  window.addEventListener("message", (event) => {
-    if (
-      event.data &&
-      typeof event.data.progress === "number" &&
-      typeof event.data.clickedCount === "number" &&
-      typeof event.data.totalTabs === "number"
-    ) {
-      const percent = event.data.progress;
-      const clicked = event.data.clickedCount;
-      const total = event.data.totalTabs;
-      const newIndex = event.data.lastClickedIndex;
-
-      const skipped = [];
-      if (previouslyClicked.length > 0) {
-        const maxVisited = Math.max(...previouslyClicked);
-        const minVisited = Math.min(...previouslyClicked);
-        if (newIndex > minVisited) {
-          for (let i = 0; i < newIndex; i++) {
-            if (!previouslyClicked.includes(i)) {
-              skipped.push(i);
-            }
-          }
+        if (skipped.includes(i)) {
+          dot.classList.add('skipped');
+        } else if (i < clicked) {
+          dot.classList.add('filled');
         }
+
+        dotsContainer.appendChild(dot);
       }
-
-      if (!previouslyClicked.includes(newIndex)) {
-        previouslyClicked.push(newIndex);
-      }
-
-      progressBar.style.width = percent + "%";
-      label.textContent = `Progress: ${percent}%`;
-
-      renderDots(total, clicked, skipped);
     }
-  });
-</script>
 
+    window.addEventListener("message", (event) => {
+      if (
+        event.data &&
+        typeof event.data.progress === "number" &&
+        typeof event.data.clickedCount === "number" &&
+        typeof event.data.totalTabs === "number"
+      ) {
+        const { progress, clickedCount, totalTabs, skippedLessons } = event.data;
+
+        progressBar.style.width = progress + "%";
+        label.textContent = `Progress: ${progress}%`;
+        renderDots(totalTabs, clickedCount, skippedLessons || []);
+      }
+    });
+  </script>
 </body>
 </html>
