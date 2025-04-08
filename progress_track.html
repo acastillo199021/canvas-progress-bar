@@ -108,8 +108,7 @@
 
         dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
         dot.addEventListener('click', () => {
-          const tab = window.parent.document.querySelectorAll('.dp-panel-heading')[i];
-          if (tab) tab.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          parent.postMessage({ scrollToTabIndex: i }, '*');
         });
 
         dotsContainer.appendChild(dot);
@@ -134,7 +133,7 @@
       }
     });
 
-    // Simulate initial state with Lecture 1 clicked
+    // Initial simulated state: Lecture 1 clicked
     renderDots(1, [0], []);
     progressBar.style.width = "10%";
     label.textContent = `Progress: 10%`;
