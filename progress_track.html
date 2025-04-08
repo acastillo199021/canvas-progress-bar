@@ -25,21 +25,11 @@
       border-radius: 50%;
       background-color: white;
       position: relative;
+      cursor: pointer;
     }
 
     .progress-dot.filled {
       background-color: #922E1F;
-    }
-
-    .progress-dot.skipped {
-      animation: blink 1s infinite;
-      background-color: yellow;
-      border-color: black;
-    }
-
-    @keyframes blink {
-      0%, 100% { background-color: yellow; }
-      50% { background-color: white; }
     }
 
     .progress-dot:hover::after {
@@ -64,7 +54,7 @@
       width: 100%;
       border-radius: 12px;
       overflow: visible;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
 
     .progress-bar {
@@ -81,6 +71,10 @@
       text-align: left;
       font-weight: bold;
     }
+
+    .tab-clicked {
+      color: #000 !important;
+    }
   </style>
 </head>
 <body>
@@ -96,18 +90,23 @@
     const label = document.getElementById('progress-label');
     const dotsContainer = document.getElementById('progress-dots');
 
-    function renderDots(total, clicked, skipped = []) {
+    let totalTabs = 0;
+    let clickedCount = 0;
+    let skippedLessons = [];
+
+    function renderDots(total, clicked, skipped) {
       dotsContainer.innerHTML = '';
       for (let i = 0; i < total; i++) {
         const dot = document.createElement('div');
         dot.className = 'progress-dot';
-        dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
+        if (i < clicked) dot.classList.add('filled');
+        dot.setAttribute('data-tooltip', `Lecture ${i + 1}`);
 
-        if (skipped.includes(i)) {
-          dot.classList.add('skipped');
-        } else if (i < clicked) {
-          dot.classList.add('filled');
-        }
+        // Scroll to the lecture when clicked
+        dot.addEventListener('click', () => {
+          const tab = window.parent.document.querySelectorAll('.dp-panel-heading')[i];
+          if (tab) tab.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
 
         dotsContainer.appendChild(dot);
       }
@@ -120,13 +119,23 @@
         typeof event.data.clickedCount === "number" &&
         typeof event.data.totalTabs === "number"
       ) {
-        const { progress, clickedCount, totalTabs, skippedLessons } = event.data;
+        const percent = event.data.progress;
+        clickedCount = event.data.clickedCount;
+        totalTabs = event.data.totalTabs;
+        skippedLessons = event.data.skippedLessons ?? [];
 
-        progressBar.style.width = progress + "%";
-        label.textContent = `Progress: ${progress}%`;
-        renderDots(totalTabs, clickedCount, skippedLessons || []);
+        progressBar.style.width = percent + "%";
+        label.textContent = `Progress: ${percent}%`;
+
+        renderDots(totalTabs, clickedCount, skippedLessons);
       }
     });
+
+    // Simulate Lecture 1 already clicked if loaded alone
+    renderDots(1, 1, []);
+    progressBar.style.width = "10%";
+    label.textContent = `Progress: 10%`;
   </script>
+
 </body>
 </html>
