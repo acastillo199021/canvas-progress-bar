@@ -107,6 +107,7 @@
         if (skipped.includes(i)) dot.classList.add('skipped');
 
         dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
+
         dot.addEventListener('click', () => {
           parent.postMessage({ scrollToTabIndex: i }, '*');
         });
@@ -133,7 +134,7 @@
       }
     });
 
-    // Initial simulated state: Lecture 1 clicked
+    // Simulate initial state with Lecture 1 clicked
     renderDots(1, [0], []);
     progressBar.style.width = "10%";
     label.textContent = `Progress: 10%`;
