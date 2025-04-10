@@ -1,183 +1,94 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Canvas Tab Progress</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px 10px 40px;
-      overflow: hidden;
-      background-color: white;
-    }
+function setupProgressTracking() {
+  const allTabs = [...document.querySelectorAll('.dp-panel-heading')];
+  const lectureTabs = allTabs.filter(tab =>
+    tab.textContent.trim().toLowerCase().includes('lecture')
+  );
 
-    .progress-dots {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 18px;
-      padding: 0 5px;
-    }
+  const iframe = document.querySelector('iframe[src*="progress_track.html"]');
 
-    .progress-dot-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 11px;
-  color: black;
-  width: 24px;
-  margin: 0 2px;
-}
-    .progress-dot {
-      width: 14px;
-  height: 14px;
-  border: 2px solid black;
-  border-radius: 50%;
-  background-color: white;
-  position: relative;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    .progress-dot.filled {
-      background-color: #922E1F;
-  transform: scale(1.15);
-    }
- 
-    .progress-dot:hover {
-  transform: scale(0.8);
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-}
-
-    .progress-dot.skipped {
-      background-color: yellow;
-  animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
+  if (!lectureTabs.length || !iframe || !iframe.contentWindow) {
+    console.log("⏳ Retrying progress tracker setup...");
+    setTimeout(setupProgressTracking, 1000);
+    return;
   }
-  50% {
-    transform: scale(1.3);
-    opacity: 0.6;
+
+  const clickedIndexes = new Set();
+
+  // Clean bad commas in class names
+  lectureTabs.forEach(tab => {
+    tab.className = tab.className.replace(/,/g, '').replace(/\s+/g, ' ').trim();
+  });
+
+  // Add gray to all lecture tabs initially
+  lectureTabs.forEach(tab => {
+    tab.classList.add('tab-not-clicked');
+  });
+
+  // Mark Lecture 1 as clicked
+  if (lectureTabs[0]) {
+    clickedIndexes.add(0);
+    lectureTabs[0].classList.remove('tab-not-clicked');
+    lectureTabs[0].classList.add('tab-clicked');
   }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-    
-    .progress-dot:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 140%;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: black;
-      color: white;
-      padding: 4px 8px;
-      font-size: 12px;
-      border-radius: 4px;
-      white-space: nowrap;
-      z-index: 999;
-    }
 
-    .progress-container {
-      background-color: white;
-      border: 2px solid black;
-      height: 22px;
-      width: 100%;
-      border-radius: 12px;
-      overflow: visible;
-      margin-bottom: 20px;
-    }
+  lectureTabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => {
+      if (!clickedIndexes.has(index)) {
+        clickedIndexes.add(index);
+        tab.classList.remove('tab-not-clicked');
+        tab.classList.add('tab-clicked');
+      }
 
-    .progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(to right, #922E1F, #c64436);
-  transition: width 0.4s ease-in-out;
-  border-top-left-radius: 12px;
-  border-bottom-left-radius: 12px;
-}
-.progress-dot-label {
-  margin-top: 4px;
-  font-weight: bold;
-  font-size: 10px;
-}
+      const sorted = Array.from(clickedIndexes).sort((a, b) => a - b);
+      const lastClicked = sorted[sorted.length - 1];
+      const skipped = [];
 
-    #progress-label {
-      margin-top: 16px;
-      text-align: left;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
+      for (let i = 0; i <= lastClicked; i++) {
+        if (!clickedIndexes.has(i)) skipped.push(i);
+      }
 
-  <div class="progress-dots" id="progress-dots"></div>
-  <div class="progress-container">
-    <div id="progress-bar" class="progress-bar"></div>
-  </div>
-  <div id="progress-label">Progress: 0%</div>
+      const percent = Math.round((clickedIndexes.size / lectureTabs.length) * 100);
 
-  <script>
-    const progressBar = document.getElementById('progress-bar');
-    const label = document.getElementById('progress-label');
-    const dotsContainer = document.getElementById('progress-dots');
+      iframe.contentWindow.postMessage({
+        progress: percent,
+        clickedCount: clickedIndexes.size,
+        totalTabs: lectureTabs.length,
+        skippedLessons: skipped,
+        clickedIndexes: Array.from(clickedIndexes)
+      }, '*');
 
-   function renderDots(total, clicked, skipped) {
-  dotsContainer.innerHTML = '';
-  for (let i = 0; i < total; i++) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'progress-dot-wrapper';
-
-    const dot = document.createElement('div');
-    dot.className = 'progress-dot';
-    dot.setAttribute('data-tooltip', `Lecture ${i + 1}`);
-
-    if (clicked.includes(i)) dot.classList.add('filled');
-    if (skipped.includes(i)) dot.classList.add('skipped');
-
-    dot.addEventListener('click', () => {
-      parent.postMessage({ scrollToTabIndex: i }, '*');
-    });
-
-    const label = document.createElement('div');
-    label.className = 'progress-dot-label';
-    label.textContent = i + 1;
-
-    wrapper.appendChild(dot);
-    wrapper.appendChild(label);
-    dotsContainer.appendChild(wrapper);
-  }
-}
-
-    window.addEventListener("message", (event) => {
-      const data = event.data;
-      if (
-        data &&
-        typeof data.progress === "number" &&
-        typeof data.clickedCount === "number" &&
-        typeof data.totalTabs === "number"
-      ) {
-        const percent = data.progress;
-        const clicked = data.clickedIndexes || [...Array(data.clickedCount).keys()];
-        const skipped = data.skippedLessons || [];
-
-        progressBar.style.width = percent + "%";
-        label.textContent = `Progress: ${percent}%`;
-        renderDots(data.totalTabs, clicked, skipped);
+      console.log(`✅ Progress sent: ${percent}% with ${clickedIndexes.size}/${lectureTabs.length} tabs clicked`);
+      if (skipped.length) {
+        console.warn(`⚠️ Skipped lessons: ${skipped.map(i => i + 1).join(', ')}`);
       }
     });
+  });
 
-    // Simulate initial state with Lecture 1 clicked
-    renderDots(1, [0], []);
-    progressBar.style.width = "10%";
-    label.textContent = `Progress: 10%`;
-  </script>
+  // Initial state push
+  const initialPercent = Math.round((clickedIndexes.size / lectureTabs.length) * 100);
+  iframe.contentWindow.postMessage({
+    progress: initialPercent,
+    clickedCount: clickedIndexes.size,
+    totalTabs: lectureTabs.length,
+    skippedLessons: [],
+    clickedIndexes: Array.from(clickedIndexes)
+  }, '*');
 
-</body>
-</html>
+  console.log("✅ Progress tracking initialized");
+}
+
+// Handle dot clicks from iframe
+window.addEventListener("message", (event) => {
+  if (event.data && typeof event.data.scrollToTabIndex === "number") {
+    const tabs = [...document.querySelectorAll('.dp-panel-heading')];
+    const tab = tabs[event.data.scrollToTabIndex];
+    if (tab) {
+      tab.scrollIntoView({ behavior: "smooth", block: "center" });
+      // 🛑 Do not mark as clicked here – only scroll
+    }
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(setupProgressTracking, 1500);
+});
