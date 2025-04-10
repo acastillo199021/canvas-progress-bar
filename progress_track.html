@@ -19,20 +19,29 @@
       padding: 0 5px;
     }
 
+    .progress-dot-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  color: black;
+  width: 24px;
+  margin: 0 2px;
+}
     .progress-dot {
-      width: 16px;
-      height: 16px;
-      border: 2px solid black;
-      border-radius: 50%;
-      background-color: white;
-      position: relative;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
+      width: 14px;
+  height: 14px;
+  border: 2px solid black;
+  border-radius: 50%;
+  background-color: white;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
     .progress-dot.filled {
       background-color: #922E1F;
-      transform: scale(1.2);
+  transform: scale(1.15);
     }
  
     .progress-dot:hover {
@@ -42,7 +51,7 @@
 
     .progress-dot.skipped {
       background-color: yellow;
-  animation: pulse 1.5s infinite;
+  animation: pulse 1s infinite;
     }
 
     @keyframes pulse {
@@ -59,6 +68,8 @@
     opacity: 1;
   }
 }
+
+    
 
     .progress-dot:hover::after {
       content: attr(data-tooltip);
@@ -93,7 +104,11 @@
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
 }
-
+.progress-dot-label {
+  margin-top: 4px;
+  font-weight: bold;
+  font-size: 10px;
+}
 
     #progress-label {
       margin-top: 16px;
