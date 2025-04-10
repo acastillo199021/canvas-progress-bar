@@ -130,24 +130,33 @@
     const label = document.getElementById('progress-label');
     const dotsContainer = document.getElementById('progress-dots');
 
-    function renderDots(total, clicked, skipped) {
-      dotsContainer.innerHTML = '';
-      for (let i = 0; i < total; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'progress-dot';
+   function renderDots(total, clicked, skipped) {
+  dotsContainer.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'progress-dot-wrapper';
 
-        if (clicked.includes(i)) dot.classList.add('filled');
-        if (skipped.includes(i)) dot.classList.add('skipped');
+    const dot = document.createElement('div');
+    dot.className = 'progress-dot';
+    dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
 
-        dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
+    if (clicked.includes(i)) dot.classList.add('filled');
+    if (skipped.includes(i)) dot.classList.add('skipped');
 
-        dot.addEventListener('click', () => {
-          parent.postMessage({ scrollToTabIndex: i }, '*');
-        });
+    dot.addEventListener('click', () => {
+      parent.postMessage({ scrollToTabIndex: i }, '*');
+    });
 
-        dotsContainer.appendChild(dot);
-      }
-    }
+    const label = document.createElement('div');
+    label.className = 'progress-dot-label';
+    label.textContent = i + 1;
+
+    wrapper.appendChild(dot);
+    wrapper.appendChild(label);
+    dotsContainer.appendChild(wrapper);
+  }
+}
+
 
     window.addEventListener("message", (event) => {
       const data = event.data;
