@@ -20,55 +20,38 @@
     }
 
     .progress-dot-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 11px;
-  color: black;
-  width: 24px;
-  margin: 0 2px;
-}
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+
     .progress-dot {
-      width: 14px;
-  height: 14px;
-  border: 2px solid black;
-  border-radius: 50%;
-  background-color: white;
-  position: relative;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+      width: 16px;
+      height: 16px;
+      border: 2px solid black;
+      border-radius: 50%;
+      background-color: white;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
     .progress-dot.filled {
       background-color: #922E1F;
-  transform: scale(1.15);
+      transform: scale(1.2);
     }
- 
-    .progress-dot:hover {
-  transform: scale(0.8);
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-}
 
     .progress-dot.skipped {
+      animation: blink 1s infinite;
       background-color: yellow;
-  animation: pulse 1s infinite;
     }
 
-    @keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-    
+    @keyframes blink {
+      0%, 100% { background-color: yellow; }
+      50% { background-color: #FFF8B0; }
+    }
+
     .progress-dot:hover::after {
       content: attr(data-tooltip);
       position: absolute;
@@ -84,6 +67,14 @@
       z-index: 999;
     }
 
+    .dp-tab-clicked {
+      color: black !important;
+    }
+
+    .dp-tab-not-clicked {
+      color: gray !important;
+    }
+
     .progress-container {
       background-color: white;
       border: 2px solid black;
@@ -95,23 +86,29 @@
     }
 
     .progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(to right, #922E1F, #c64436);
-  transition: width 0.4s ease-in-out;
-  border-top-left-radius: 12px;
-  border-bottom-left-radius: 12px;
-}
-.progress-dot-label {
-  margin-top: 4px;
-  font-weight: bold;
-  font-size: 10px;
-}
+      height: 100%;
+      width: 0%;
+      background-color: #922E1F;
+      transition: width 0.3s ease;
+      border-top-left-radius: 12px;
+      border-bottom-left-radius: 12px;
+    }
 
     #progress-label {
       margin-top: 16px;
       text-align: left;
       font-weight: bold;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
     }
   </style>
 </head>
@@ -122,38 +119,42 @@
     <div id="progress-bar" class="progress-bar"></div>
   </div>
   <div id="progress-label">Progress: 0%</div>
+  <div aria-live="polite" class="sr-only" id="skip-announcement"></div>
 
   <script>
     const progressBar = document.getElementById('progress-bar');
     const label = document.getElementById('progress-label');
     const dotsContainer = document.getElementById('progress-dots');
+    const announcer = document.getElementById('skip-announcement');
 
-   function renderDots(total, clicked, skipped) {
-  dotsContainer.innerHTML = '';
-  for (let i = 0; i < total; i++) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'progress-dot-wrapper';
+    function renderDots(total, clicked, skipped) {
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < total; i++) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'progress-dot-wrapper';
 
-    const dot = document.createElement('div');
-    dot.className = 'progress-dot';
-    dot.setAttribute('data-tooltip', `Lecture ${i + 1}`);
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
 
-    if (clicked.includes(i)) dot.classList.add('filled');
-    if (skipped.includes(i)) dot.classList.add('skipped');
+        if (clicked.includes(i)) dot.classList.add('filled');
+        if (skipped.includes(i)) dot.classList.add('skipped');
 
-    dot.addEventListener('click', () => {
-      parent.postMessage({ scrollToTabIndex: i }, '*');
-    });
+        dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
 
-    const label = document.createElement('div');
-    label.className = 'progress-dot-label';
-    label.textContent = i + 1;
+        dot.addEventListener('click', () => {
+          parent.postMessage({ scrollToTabIndex: i }, '*');
+        });
 
-    wrapper.appendChild(dot);
-    wrapper.appendChild(label);
-    dotsContainer.appendChild(wrapper);
-  }
-}
+        wrapper.appendChild(dot);
+        dotsContainer.appendChild(wrapper);
+      }
+
+      if (skipped.length > 0) {
+        announcer.textContent = `You skipped lesson${skipped.length > 1 ? 's' : ''} ${skipped.map(i => i + 1).join(', ')}`;
+      } else {
+        announcer.textContent = '';
+      }
+    }
 
     window.addEventListener("message", (event) => {
       const data = event.data;
