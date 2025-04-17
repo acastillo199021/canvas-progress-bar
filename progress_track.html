@@ -68,12 +68,12 @@
     }
 
     .dp-tab-clicked {
-  background-color: black !important;
-}
+      background-color: black !important;
+    }
 
     .dp-tab-not-clicked {
-  background-color: gray !important;
-}
+      background-color: gray !important;
+    }
 
     .progress-container {
       background-color: white;
@@ -120,12 +120,14 @@
   </div>
   <div id="progress-label">Progress: 0%</div>
   <div aria-live="polite" class="sr-only" id="skip-announcement"></div>
+  <div aria-live="polite" class="sr-only" id="progress-announce"></div>
 
   <script>
     const progressBar = document.getElementById('progress-bar');
     const label = document.getElementById('progress-label');
     const dotsContainer = document.getElementById('progress-dots');
     const announcer = document.getElementById('skip-announcement');
+    const progressAnnouncer = document.getElementById('progress-announce');
 
     function renderDots(total, clicked, skipped) {
       dotsContainer.innerHTML = '';
@@ -170,6 +172,7 @@
 
         progressBar.style.width = percent + "%";
         label.textContent = `Progress: ${percent}%`;
+        progressAnnouncer.textContent = `Progress updated: ${percent}% complete`;
         renderDots(data.totalTabs, clicked, skipped);
       }
     });
