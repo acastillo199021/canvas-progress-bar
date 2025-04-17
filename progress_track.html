@@ -119,15 +119,21 @@
     <div id="progress-bar" class="progress-bar"></div>
   </div>
   <div id="progress-label">Progress: 0%</div>
-
-  <!-- ✅ Screen reader announcer -->
+  <div aria-live="polite" class="sr-only" id="skip-announcement"></div>
   <div aria-live="polite" class="sr-only" id="progress-announce"></div>
 
   <script>
     const progressBar = document.getElementById('progress-bar');
     const label = document.getElementById('progress-label');
     const dotsContainer = document.getElementById('progress-dots');
-    const progressAnnouncer = document.getElementById('progress-announce');
+    const announcer = document.getElementById('skip-announcement');
+    const progressAnnounce = document.getElementById('progress-announce');
+
+    function getStorageKey() {
+      const courseId = window.location.pathname.match(/courses\/(\d+)/)?.[1] || 'unknown';
+      const page = location.pathname.split('/').pop() || 'page';
+      return `canvasClickedTabs_${courseId}_${page}`;
+    }
 
     function renderDots(total, clicked, skipped) {
       dotsContainer.innerHTML = '';
@@ -150,6 +156,12 @@
         wrapper.appendChild(dot);
         dotsContainer.appendChild(wrapper);
       }
+
+      if (skipped.length > 0) {
+        announcer.textContent = `You skipped lesson${skipped.length > 1 ? 's' : ''} ${skipped.map(i => i + 1).join(', ')}`;
+      } else {
+        announcer.textContent = '';
+      }
     }
 
     window.addEventListener("message", (event) => {
@@ -166,19 +178,11 @@
 
         progressBar.style.width = percent + "%";
         label.textContent = `Progress: ${percent}%`;
-
-        // 🔊 Screen reader announcement
-        const progressMessage = `Progress updated: ${percent}% complete`;
-        const skipMessage = skipped.length
-          ? `. Skipped lesson${skipped.length > 1 ? 's' : ''}: ${skipped.map(i => i + 1).join(', ')}`
-          : '';
-        progressAnnouncer.textContent = progressMessage + skipMessage;
-
+        progressAnnounce.textContent = `Progress updated: ${percent}% complete`;
         renderDots(data.totalTabs, clicked, skipped);
       }
     });
 
-    // Simulate initial state
     renderDots(1, [0], []);
     progressBar.style.width = "10%";
     label.textContent = `Progress: 10%`;
