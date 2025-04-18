@@ -150,7 +150,7 @@
         dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
 
         dot.addEventListener('click', () => {
-          parent.postMessage({ scrollToTabIndex: i }, '*');
+          parent.postMessage({ scrollToTabIndex: i, simulateClick: true }, '*');
         });
 
         wrapper.appendChild(dot);
