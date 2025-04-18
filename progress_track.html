@@ -147,7 +147,7 @@
         if (clicked.includes(i)) dot.classList.add('filled');
         if (skipped.includes(i)) dot.classList.add('skipped');
 
-        dot.setAttribute('data-tooltip', `Lesson ${i + 1}`);
+        dot.setAttribute('data-tooltip', `Lecture ${i + 1}`);
 
         dot.addEventListener('click', () => {
           parent.postMessage({ scrollToTabIndex: i, simulateClick: true }, '*');
